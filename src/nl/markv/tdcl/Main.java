@@ -1,6 +1,5 @@
 package nl.markv.tdcl;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,6 +18,6 @@ public class Main {
         var n3 = new Node("Comp3", cur(n1), prev(n2));
         var n4 = new Node("Comp4", cur(n3)).selfRef(Current);
         var n5 = new Node("Final5", cur(n4));
-        List<Node> finals = Arrays.asList(n5);
+        List<Node> finals = Collections.singletonList(n5);
     }
 }

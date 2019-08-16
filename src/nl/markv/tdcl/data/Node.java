@@ -11,14 +11,14 @@ public final class Node {
 	@Nonnull
 	public final String name;
 	@Nonnull
-	public final List<Dependency> dependencies;
+	public final List<Dependency> directDependencies;
 
 	public Node(
 			@Nonnull String name,
 			@Nonnull Dependency... dependencies
 	) {
 		this.name = name;
-		this.dependencies = List.of(dependencies);
+		this.directDependencies = List.of(dependencies);
 	}
 
 	@Override
@@ -27,17 +27,17 @@ public final class Node {
 		if (o == null || getClass() != o.getClass()) return false;
 		Node node = (Node) o;
 		return Objects.equals(name, node.name) &&
-				Objects.equals(dependencies, node.dependencies);
+				Objects.equals(directDependencies, node.directDependencies);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, dependencies);
+		return Objects.hash(name, directDependencies);
 	}
 
 	@Nonnull
 	public Node selfRef(Dependency.Direction direction) {
-		List<Dependency> newDependencies = new ArrayList<>(dependencies);
+		List<Dependency> newDependencies = new ArrayList<>(directDependencies);
 		newDependencies.add(new Dependency(direction, this));
 		return new Node(name, newDependencies.toArray(new Dependency[0]));
 	}
