@@ -4,8 +4,9 @@ import javax.annotation.Nonnull;
 
 import nl.markv.tdcl.data.Dependency;
 
-
-
+/**
+ * A chain of dependencies, to report cycles.
+ */
 public class Chain {
 
 	@Nonnull
