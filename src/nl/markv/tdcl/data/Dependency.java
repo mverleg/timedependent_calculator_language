@@ -7,9 +7,16 @@ import javax.annotation.Nonnull;
 public final class Dependency {
 
 	public enum Direction {
-		Previous,
-		Current,
-		Next,
+		Previous(-1),
+		Current(0),
+		Next(+1),
+		;
+
+		public final int rowStep;
+
+		Direction(int rowStep) {
+			this.rowStep = rowStep;
+		}
 	}
 
 	@Nonnull
