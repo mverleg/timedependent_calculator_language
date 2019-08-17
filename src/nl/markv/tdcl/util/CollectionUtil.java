@@ -13,7 +13,7 @@ public class CollectionUtil {
 	/**
 	 * Produces a list that contains the items in the original in the same order, but with any
 	 * duplicates after the first instance removed.
-	 *
+	 * <p>
 	 * Items should implement {@link Object#equals(Object)} and {@link Object#hashCode()}.
 	 */
 	@Nonnull
@@ -31,5 +31,23 @@ public class CollectionUtil {
 		}
 
 		return unique;
+	}
+
+	@Nonnull
+	public static <T> List<T> listOf(@Nonnull T... items) {
+		List<T> li = new ArrayList<>(items.length);
+		for (T item : items) {
+			li.add(item);
+		}
+		return li;
+	}
+
+	@Nonnull
+	public static <T> Set<T> setOf(@Nonnull T... items) {
+		Set<T> set = new HashSet<>(items.length);
+		for (T item : items) {
+			set.add(item);
+		}
+		return set;
 	}
 }

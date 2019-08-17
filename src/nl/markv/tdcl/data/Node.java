@@ -1,12 +1,13 @@
 package nl.markv.tdcl.data;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import static nl.markv.tdcl.util.CollectionUtil.listOf;
 
 public final class Node {
 
@@ -25,7 +26,7 @@ public final class Node {
 			@Nonnull Dependency... dependencies
 	) {
 		this.name = name.intern();
-		this.directDependencies = new ArrayList<Dependency>(Arrays.asList(dependencies));
+		this.directDependencies = listOf(dependencies);
 		this.cachedHashCode = Objects.hash(name);
 	}
 

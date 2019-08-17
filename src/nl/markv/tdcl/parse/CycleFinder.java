@@ -110,9 +110,9 @@ public final class CycleFinder {
 		}
 
 		// Make the group.
-		List<Node> nodes = cycle.stream()
+		Set<Node> nodes = cycle.stream()
 				.map(dep -> dep.node)
-				.collect(Collectors.toList());
+				.collect(Collectors.toSet());
 		CycleNodeGroup newGroup = new CycleNodeGroup(
 				nodes, canDownwards, canUpwards);
 

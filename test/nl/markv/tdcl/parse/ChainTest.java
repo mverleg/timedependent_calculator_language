@@ -43,4 +43,17 @@ class ChainTest {
 		assertEquals(gamma, linear.get(0).node);
 		assertEquals(beta, linear.get(1).node);
 	}
+
+	@Test
+	void findUptoNodeCycle() {
+		var alpha = new Node("Alpha" /*gamma*/);
+		var beta = new Node("Beta", cur(alpha));
+		var gamma = new Node("Gamma", cur(beta));
+		alpha.addDependency(cur(gamma));
+		Chain chain = new Chain(new Chain(new Chain(new Chain(null, cur(gamma)), cur(alpha)), prev(beta)), next(gamma));
+		List<Dependency> linear = chain.findUptoNode(beta);
+		assertEquals(2, linear.size());
+		assertEquals(gamma, linear.get(0).node);
+		assertEquals(beta, linear.get(1).node);
+	}
 }
