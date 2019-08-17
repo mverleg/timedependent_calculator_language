@@ -1,6 +1,7 @@
 package nl.markv.tdcl.parse;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 
@@ -33,7 +34,7 @@ public final class DependencyResolver {
 
 		//TODO @mark: another note: if I add depth instead of prev/next to Chain, then is the in-group order just determined by ordering depth?
 
-		List<NodeGroup> groups = CycleFinder.distributeIntoCycles(finalNodes);
+		Set<NodeCycleGroup> groups = CycleFinder.distributeIntoCycles(finalNodes);
 
 //		Map<Node, Set<Node>> recursiveDeps = new HashMap<>();
 //		for (Node node : finalNodes) {
@@ -47,5 +48,4 @@ public final class DependencyResolver {
 
 		throw new UnsupportedOperationException("todo: ");  //TODO @mark:
 	}
-
 }
