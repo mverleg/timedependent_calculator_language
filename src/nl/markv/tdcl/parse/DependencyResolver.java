@@ -1,18 +1,10 @@
 package nl.markv.tdcl.parse;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 import javax.annotation.Nonnull;
 
-import jdk.jshell.spi.ExecutionControl;
-import nl.markv.tdcl.data.Dependency;
 import nl.markv.tdcl.data.Node;
-
-import static nl.markv.tdcl.data.Dependency.cur;
 
 public final class DependencyResolver {
 
@@ -41,37 +33,19 @@ public final class DependencyResolver {
 
 		//TODO @mark: another note: if I add depth instead of prev/next to Chain, then is the in-group order just determined by ordering depth?
 
-		Map<Node, Set<Node>> recursiveDeps = new HashMap<>();
-		for (Node node : finalNodes) {
-			findDependencyCycles(node, new Chain(null, cur(node)), recursiveDeps);
-		}
+		List<NodeGroup> groups = CycleFinder.distributeIntoCycles(finalNodes);
+
+//		Map<Node, Set<Node>> recursiveDeps = new HashMap<>();
+//		for (Node node : finalNodes) {
+//			findDependencyCycles(node, new Chain(null, cur(node)), recursiveDeps);
+//		}
 
 
 
 		EvalOrder order = new EvalOrder();
 
 
-		throw new NotImplementedException("todo: ");  //TODO @mark:
-	}
-
-	@Nonnull
-	private static Optional<Chain> findDependencyCycles(
-			@Nonnull Node currentNode,
-			@Nonnull Chain chain,
-			@Nonnull Map<Node, Set<Node>> recursiveDeps
-	) {
-		for (Dependency dep : currentNode.directDependencies) {
-			Set<Node> currentRecDeps = recursiveDeps.get(dep.node);
-			if (currentRecDeps != null && currentRecDeps.contains(dep)) {
-				// A cycle was found!
-				throw new IllegalStateException("cycle!");
-			}
-			findDependencyCycles(
-					dep.node,
-					new Chain(chain, dep),
-					recursiveDeps
-			);
-		}
+		throw new UnsupportedOperationException("todo: ");  //TODO @mark:
 	}
 
 }

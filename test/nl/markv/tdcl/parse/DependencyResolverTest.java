@@ -20,7 +20,7 @@ class DependencyResolverTest {
 		var n3 = new Node("Gamma", cur(n2));
 		List<Node> finals = Collections.singletonList(n3);
 
-		new DependencyResolver(finals)
+		DependencyResolver.solve(finals);
 	}
 
 	@Test
@@ -31,5 +31,7 @@ class DependencyResolverTest {
 		var n4 = new Node("Comp4", cur(n3)).selfRef(Current);
 		var n5 = new Node("Final5", cur(n4));
 		List<Node> finals = Collections.singletonList(n5);
+
+		DependencyResolver.solve(finals);
 	}
 }
