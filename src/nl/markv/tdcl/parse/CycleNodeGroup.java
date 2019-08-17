@@ -1,5 +1,6 @@
 package nl.markv.tdcl.parse;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -11,7 +12,7 @@ import nl.markv.tdcl.data.Node;
 public final class CycleNodeGroup implements NodeGroup {
 
 	@Nonnull
-	public final Set<Node> nodes;
+	public final Set<Node> cycleNodes;
 
 	public final boolean canDownwards;
 	public final boolean canUpwards;
@@ -27,7 +28,7 @@ public final class CycleNodeGroup implements NodeGroup {
 		if (new HashSet<>(nodes).size() != nodes.size()) {
 			throw new IllegalArgumentException("A node cycle group should not contain duplicates.");
 		}
-		this.nodes = nodes;
+		this.cycleNodes = nodes;
 		this.canDownwards = canDownwards;
 		this.canUpwards = canUpwards;
 	}
@@ -36,7 +37,7 @@ public final class CycleNodeGroup implements NodeGroup {
 		if (!canDownwards && !canUpwards) {
 			return true;
 		}
-		if (canDownwards && canUpwards && nodes.size() > 1) {
+		if (canDownwards && canUpwards && cycleNodes.size() > 1) {
 			// ("Groups of more than 1 node must have an order restraint. " +
 			// "This is the case because only a cycle with only 'current' dependencies (no 'prev' or " +
 			// "'next') would be unrestrained. But such a cycle would be cyclic and impossible to compute.");
@@ -48,8 +49,8 @@ public final class CycleNodeGroup implements NodeGroup {
 	@Nonnull
 	public CycleNodeGroup merge(@Nonnull CycleNodeGroup mergeGroup) {
 
-		Set<Node> mergedNodes = new HashSet<>(mergeGroup.nodes);
-		mergedNodes.addAll(this.nodes);
+		Set<Node> mergedNodes = new HashSet<>(mergeGroup.cycleNodes);
+		mergedNodes.addAll(this.cycleNodes);
 		return new CycleNodeGroup(
 				mergedNodes,
 				this.canDownwards && mergeGroup.canDownwards,
@@ -64,11 +65,40 @@ public final class CycleNodeGroup implements NodeGroup {
 		CycleNodeGroup that = (CycleNodeGroup) o;
 		return canDownwards == that.canDownwards &&
 				canUpwards == that.canUpwards &&
-				nodes.equals(that.nodes);
+				cycleNodes.equals(that.cycleNodes);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(nodes, canDownwards, canUpwards);
+		return Objects.hash(cycleNodes, canDownwards, canUpwards);
+	}
+
+	@Nonnull
+	@Override
+	public Collection<Node> nodes() {
+		return cycleNodes;
+	}
+
+	@Override
+	public int size() {
+		return cycleNodes.size();
+	}
+
+	@Nonnull
+	@Override
+	public Order order() {
+		if (canUpwards && canDownwards) {
+			return Order.Conflict;
+		}
+		if (!canUpwards && !canDownwards) {
+			return Order.Any;
+		}
+		if (canUpwards) {
+			return Order.Up;
+		}
+		if (canDownwards) {
+			return Order.Down;
+		}
+		throw new UnsupportedOperationException();
 	}
 }

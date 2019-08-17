@@ -6,16 +6,16 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-public final class EvalOrder implements Iterable<CycleNodeGroup> {
+public final class EvalOrder implements Iterable<NodeGroup> {
 
 	@Nonnull
-	private final List<CycleNodeGroup> reverseEvalList;
+	private final List<NodeGroup> reverseEvalList;
 
 	public EvalOrder() {
 		this.reverseEvalList = new ArrayList<>();
 	}
 
-	public void add(@Nonnull CycleNodeGroup group) {
+	public void add(@Nonnull NodeGroup group) {
 		reverseEvalList.add(group);
 	}
 
@@ -24,17 +24,17 @@ public final class EvalOrder implements Iterable<CycleNodeGroup> {
 	}
 
 	@Override
-	public Iterator<CycleNodeGroup> iterator() {
+	public Iterator<NodeGroup> iterator() {
 		return new EvalOrderIterator(reverseEvalList);
 	}
 
-	private static class EvalOrderIterator implements Iterator<CycleNodeGroup> {
+	private static class EvalOrderIterator implements Iterator<NodeGroup> {
 
 		@Nonnull
-		private final List<CycleNodeGroup> reverseEvalList;
+		private final List<NodeGroup> reverseEvalList;
 		private int i;
 
-		private EvalOrderIterator(@Nonnull List<CycleNodeGroup> reverseEvalList) {
+		private EvalOrderIterator(@Nonnull List<NodeGroup> reverseEvalList) {
 			this.reverseEvalList = reverseEvalList;
 			this.i = reverseEvalList.size() - 1;
 		}
@@ -45,8 +45,8 @@ public final class EvalOrder implements Iterable<CycleNodeGroup> {
 		}
 
 		@Override
-		public CycleNodeGroup next() {
-			CycleNodeGroup item = reverseEvalList.get(i);
+		public NodeGroup next() {
+			NodeGroup item = reverseEvalList.get(i);
 			i -= 1;
 			return item;
 		}

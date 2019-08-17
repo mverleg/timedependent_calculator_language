@@ -126,7 +126,7 @@ public final class CycleFinder {
 		}
 
 		// Register as group of the nodes.
-		for (Node node : newGroup.nodes) {
+		for (Node node : newGroup.cycleNodes) {
 			state.cycleNodeGroups.put(node, newGroup);
 		}
 

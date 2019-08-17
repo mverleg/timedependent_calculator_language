@@ -1,10 +1,13 @@
 package nl.markv.tdcl.parse;
 
+import java.util.Collection;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
 import nl.markv.tdcl.data.Node;
+
+import static nl.markv.tdcl.util.CollectionUtil.listOf;
 
 public final class SingleNodeGroup implements NodeGroup {
 
@@ -26,5 +29,27 @@ public final class SingleNodeGroup implements NodeGroup {
 	@Override
 	public int hashCode() {
 		return Objects.hash(node) + 93457;
+	}
+
+	@Nonnull
+	@Override
+	public Collection<Node> nodes() {
+		return listOf(node);
+	}
+
+	@Override
+	public int size() {
+		return 1;
+	}
+
+	@Nonnull
+	@Override
+	public Order order() {
+		return Order.Any;
+	}
+
+	@Override
+	public boolean hasConflict() {
+		return false;
 	}
 }

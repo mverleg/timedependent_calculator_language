@@ -12,11 +12,11 @@ import static nl.markv.tdcl.data.Dependency.Direction.Current;
 import static nl.markv.tdcl.data.Dependency.Direction.Previous;
 import static nl.markv.tdcl.data.Dependency.cur;
 import static nl.markv.tdcl.data.Dependency.prev;
-import static nl.markv.tdcl.util.CollectionUtil.listOf;
 import static nl.markv.tdcl.util.CollectionUtil.setOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+//TODO @mark: multiple starting points
 class CycleFinderTest {
 
 	@Test
