@@ -1,6 +1,7 @@
 package nl.markv.tdcl.parse;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -9,9 +10,6 @@ import javax.annotation.Nonnull;
 import nl.markv.tdcl.data.Node;
 
 public final class CycleNodeGroup implements NodeGroup {
-
-	private static int nextIdentity;
-	public final int identity;
 
 	@Nonnull
 	public final List<Node> nodes;
@@ -27,10 +25,12 @@ public final class CycleNodeGroup implements NodeGroup {
 		if (nodes.size() == 0) {
 			throw new IllegalArgumentException("Cannot create a group without any nodes.");
 		}
+		if (new HashSet<>(nodes).size() != nodes.size()) {
+			throw new IllegalArgumentException("A node cycle group should not contain duplicates.");
+		}
 		this.nodes = nodes;
 		this.canDownwards = canDownwards;
 		this.canUpwards = canUpwards;
-		identity = nextIdentity++;
 	}
 
 	public boolean hasConflict() {
@@ -62,12 +62,14 @@ public final class CycleNodeGroup implements NodeGroup {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-		CycleNodeGroup nodeCycleGroup = (CycleNodeGroup) o;
-		return identity == nodeCycleGroup.identity;
+		CycleNodeGroup that = (CycleNodeGroup) o;
+		return canDownwards == that.canDownwards &&
+				canUpwards == that.canUpwards &&
+				nodes.equals(that.nodes);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(identity);
+		return Objects.hash(nodes, canDownwards, canUpwards);
 	}
 }

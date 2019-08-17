@@ -12,6 +12,10 @@ import nl.markv.tdcl.data.Node;
 
 /**
  * A chain of dependencies, to report cycles.
+ *
+ * It's actually a tree, but the thing that matters is the path from the current leaf to the root, which is a chain.
+ *
+ * The chain should be cut off upon encountering a duplicate, but the first and last element could be the same.
  */
 public class Chain {
 
@@ -24,6 +28,9 @@ public class Chain {
 			@Nullable Chain parent,
 			@Nonnull Dependency dependency
 	) {
+//		if (parent != null && dependency.node.equals(parent.dependency.node)) {
+//			throw new IllegalArgumentException("Chain node is the same as parent node");
+//		}
 		this.parent = parent;
 		this.dependency = dependency;
 	}
@@ -40,7 +47,9 @@ public class Chain {
 	}
 
 	@Nonnull
-	public List<Dependency> findUptoNode(@Nonnull Node node) {
+	public List<Dependency> findUptoNode(@Nonnull Node uptoNode) {
+
+		//TODO @mark: I have a feeling this method could be easier...
 
 		List<Dependency> uptoList = new ArrayList<>();
 		Chain current = this;
@@ -50,12 +59,33 @@ public class Chain {
 			if (current == null) {
 				break;
 			}
-			if (current.dependency.node.equals(node)) {
-				uptoList.add(current.dependency);
+			if (current.dependency.node.equals(uptoNode)) {
+				if (!current.dependency.node.equals(dependency.node)) {
+					uptoList.add(current.dependency);
+				}
 				break;
 			}
 		}
 
 		return uptoList;
+	}
+
+	@Nonnull
+	public String toString() {
+
+		var isFirst = true;
+		var text = new StringBuilder();
+		Chain current = this;
+		while (current != null) {
+			if (isFirst) {
+				isFirst = false;
+			} else {
+				text.append(" <- ");
+			}
+			text.append(current.dependency);
+			current = current.parent;
+		}
+
+		return text.toString();
 	}
 }

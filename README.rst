@@ -23,8 +23,3 @@ Note that:
 
 * There are special cases at the edges, no worry for now about out-of-bounds.
 * This analysis is done statically, so runtime if-statements are treated as 'is dependent', not 'is maybe dependent'. This could mean that a program seems to be cyclic and is rejected, even though in practise the if-statements prevent a cycle.
-
-Some resources:
-
-* https://www.electricmonk.nl/docs/dependency_resolving_algorithm/dependency_resolving_algorithm.html
-*

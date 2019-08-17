@@ -25,6 +25,6 @@ public final class SingleNodeGroup implements NodeGroup {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(node);
+		return Objects.hash(node) + 93457;
 	}
 }

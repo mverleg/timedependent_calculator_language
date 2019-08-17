@@ -1,6 +1,7 @@
 package nl.markv.tdcl.data;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -9,10 +10,12 @@ import javax.annotation.Nullable;
 
 public final class Node {
 
+	//TODO: I'd like this to be immutable, but I can't create cycles of immutable objects.
+
 	@Nonnull
 	public final String name;
 	@Nonnull
-	public final List<Dependency> directDependencies;
+	public List<Dependency> directDependencies;
 
 	@Nonnull
 	public final int cachedHashCode;
@@ -22,7 +25,7 @@ public final class Node {
 			@Nonnull Dependency... dependencies
 	) {
 		this.name = name.intern();
-		this.directDependencies = List.of(dependencies);
+		this.directDependencies = new ArrayList<Dependency>(Arrays.asList(dependencies));
 		this.cachedHashCode = Objects.hash(name);
 	}
 
@@ -54,5 +57,9 @@ public final class Node {
 	@Override
 	public String toString() {
 		return name;
+	}
+
+	public void addDependency(@Nonnull Dependency dep) {
+		directDependencies.add(dep);
 	}
 }
