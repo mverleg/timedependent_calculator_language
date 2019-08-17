@@ -87,10 +87,10 @@ public final class CycleNodeGroup implements NodeGroup {
 	@Nonnull
 	@Override
 	public Order order() {
-		if (canUpwards && canDownwards) {
+		if (!canUpwards && !canDownwards) {
 			return Order.Conflict;
 		}
-		if (!canUpwards && !canDownwards) {
+		if (canUpwards && canDownwards) {
 			return Order.Any;
 		}
 		if (canUpwards) {

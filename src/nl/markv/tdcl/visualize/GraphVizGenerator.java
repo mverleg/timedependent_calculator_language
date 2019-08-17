@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
+import nl.markv.tdcl.data.Dependency;
 import nl.markv.tdcl.data.Node;
 import nl.markv.tdcl.parse.NodeGroup;
 
@@ -16,65 +17,12 @@ public class GraphVizGenerator {
 
 	//TODO @mark: http://viz-js.com/
 
-	private static final class GraphBuilder {
-		@Nonnull
-		private StringBuilder text = new StringBuilder("");
-		private int indent = 1;
-		private int uniqueNameNr = 1;
-
-		// [color="red:blue"]
-
-		private void writeIndent() {
-			for (int i = 0; i < indent; i++) {
-				text.append("\t");
-			}
-		}
-
-		@Nonnull
-		String build() {
-			return "digraph G {\n" + text.toString() + "}\n\n";
-		}
-
-		void startGroup(
-				String label,
-				boolean specialColor
-		) {
-			writeIndent();
-			text.append("subgraph cluster_")
-					.append(uniqueNameNr++)
-					.append(" {\n");
-			indent++;
-			if (specialColor) {
-				writeIndent();
-				text.append("color=red;\n");
-			}
-			writeIndent();
-			text.append("label = \"")
-					.append(label)
-					.append("\";\n");
-		}
-
-		void endGroup() {
-			indent--;
-			writeIndent();
-			text.append("}\n\n");
-		}
-
-		void node(@Nonnull String name) {
-			writeIndent();
-			text.append(name)
-					.append(";\n");
-		}
-
-	}
-
-
 	@Nonnull
 	public static String generateGraphViz(
 			@Nonnull Set<Node> allNodes,
 			@Nonnull Set<NodeGroup> groups
 	) {
-		var graphViz = new GraphBuilder();
+		var graphViz = new GraphVizCodeBuilder();
 
 		// Set up mapping from node to group
 		Map<Node, NodeGroup> nodeGroups = new HashMap<>();
@@ -87,7 +35,7 @@ public class GraphVizGenerator {
 			}
 		}
 
-		// Plot all the nodes that are in a group of more than one node.
+		graphViz.comment("Groups with more than one member.");
 		for (NodeGroup group : groups) {
 			if (group.size() <= 1) {
 				continue;
@@ -102,10 +50,76 @@ public class GraphVizGenerator {
 				graphViz.startGroup("!!!", true);
 			}
 			for (Node node : group.nodes()) {
-				graphViz.node(node.name);
+				graphViz.node(node.name, null);
 			}
 			graphViz.endGroup();
 		}
+
+		graphViz.comment("Self-referential nodes (groups with one member).");
+		for (NodeGroup group : groups) {
+			if (group.size() > 1) {
+				continue;
+			}
+			Node node = group.nodes().iterator().next();
+			if (group.order().equals(NodeGroup.Order.Up)) {
+				graphViz.node(node.name, UP);
+			} else if (group.order().equals(NodeGroup.Order.Down)) {
+				graphViz.node(node.name, DOWN);
+			} else if (group.order().equals(NodeGroup.Order.Conflict) || group.hasConflict()) {
+				graphViz.node(node.name, "!!!", "red");
+			}
+		}
+
+		graphViz.comment("Ungrouped nodes that are not self-referential.");
+		for (NodeGroup group : groups) {
+			if (group.size() > 1) {
+				continue;
+			}
+			Node node = group.nodes().iterator().next();
+			if (group.order().equals(NodeGroup.Order.Any)) {
+				graphViz.node(node.name, null);
+			}
+		}
+
+		graphViz.comment("Redundant nodes that are not needed for the final result.");
+		for (Node extraNode : allNodes) {
+			if (nodeGroups.containsKey(extraNode)) {
+				continue;
+			}
+			graphViz.node(extraNode.name, null, "gray");
+		}
+
+		graphViz.comment("References to previous rows.");
+		for (Node toNode : allNodes) {
+			for (Dependency fromDependency : toNode.directDependencies) {
+				if (fromDependency.direction == Dependency.Direction.Previous) {
+					Node fromNode = fromDependency.node;
+					graphViz.arrow(fromNode.name, toNode.name, "blue");
+				}
+			}
+		}
+
+		graphViz.comment("References to current rows.");
+		for (Node toNode : allNodes) {
+			for (Dependency fromDependency : toNode.directDependencies) {
+				if (fromDependency.direction == Dependency.Direction.Current) {
+					Node fromNode = fromDependency.node;
+					graphViz.arrow(fromNode.name, toNode.name, "black");
+				}
+			}
+		}
+
+		graphViz.comment("References to next rows.");
+		for (Node toNode : allNodes) {
+			for (Dependency fromDependency : toNode.directDependencies) {
+				if (fromDependency.direction == Dependency.Direction.Next) {
+					Node fromNode = fromDependency.node;
+					graphViz.arrow(fromNode.name, toNode.name, "red");
+				}
+			}
+		}
+
+//		graphViz.comment("Redundant nodes that are not needed for the final result.");
 
 		//TODO @mark: TEMPORARY! REMOVE THIS!
 		return graphViz.build();

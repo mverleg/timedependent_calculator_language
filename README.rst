@@ -23,3 +23,7 @@ Note that:
 
 * There are special cases at the edges, no worry for now about out-of-bounds.
 * This analysis is done statically, so runtime if-statements are treated as 'is dependent', not 'is maybe dependent'. This could mean that a program seems to be cyclic and is rejected, even though in practise the if-statements prevent a cycle.
+
+Extra ideas:
+
+* Cycles are the variables that cannot be calculated as a whole time series. It may be possible to speed things up by taking all variables inside cycles, then at the AST level of the variable, extracting all branches that don't contain references to cycle members (but whose parent does). These can then be turned into separate variables, and dividing into cycles again should put those parts of the formulas outside the cycle (and thus allow more optimization).
