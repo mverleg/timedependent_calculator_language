@@ -1,5 +1,6 @@
 package nl.markv.tdcl.parse;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -22,7 +23,7 @@ public final class NodeGroup {
 	public final boolean canDownwards;
 	public final boolean canUpwards;
 
-	private NodeGroup(
+	public NodeGroup(
 			@Nonnull List<Node> nodes,
 			boolean canDownwards,
 			boolean canUpwards
@@ -46,5 +47,17 @@ public final class NodeGroup {
 			return true;
 		}
 		return false;
+	}
+
+	@Nonnull
+	public NodeGroup merge(@Nonnull NodeGroup mergeGroup) {
+
+		ArrayList<Node> mergedNodes = new ArrayList<>(this.nodes);
+		mergedNodes.addAll(mergeGroup.nodes);
+		return new NodeGroup(
+				mergedNodes,
+				this.canDownwards && mergeGroup.canDownwards,
+				this.canUpwards && mergeGroup.canUpwards
+		);
 	}
 }

@@ -57,4 +57,9 @@ public final class Dependency {
 	public int hashCode() {
 		return Objects.hash(direction, node);
 	}
+
+	@Override
+	public String toString() {
+		return direction.name().toLowerCase() + " " + node;
+	}
 }

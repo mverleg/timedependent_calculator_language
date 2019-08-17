@@ -50,4 +50,9 @@ public final class Node {
 	public int hashCode() {
 		return cachedHashCode;
 	}
+
+	@Override
+	public String toString() {
+		return name;
+	}
 }
