@@ -8,7 +8,7 @@ import javax.annotation.Nonnull;
 
 import nl.markv.tdcl.data.Node;
 
-public final class NodeCycleGroup implements NodeGroup {
+public final class CycleNodeGroup implements NodeGroup {
 
 	private static int nextIdentity;
 	public final int identity;
@@ -19,7 +19,7 @@ public final class NodeCycleGroup implements NodeGroup {
 	public final boolean canDownwards;
 	public final boolean canUpwards;
 
-	public NodeCycleGroup(
+	public CycleNodeGroup(
 			@Nonnull List<Node> nodes,
 			boolean canDownwards,
 			boolean canUpwards
@@ -47,11 +47,11 @@ public final class NodeCycleGroup implements NodeGroup {
 	}
 
 	@Nonnull
-	public NodeCycleGroup merge(@Nonnull NodeCycleGroup mergeGroup) {
+	public CycleNodeGroup merge(@Nonnull CycleNodeGroup mergeGroup) {
 
 		ArrayList<Node> mergedNodes = new ArrayList<>(this.nodes);
 		mergedNodes.addAll(mergeGroup.nodes);
-		return new NodeCycleGroup(
+		return new CycleNodeGroup(
 				mergedNodes,
 				this.canDownwards && mergeGroup.canDownwards,
 				this.canUpwards && mergeGroup.canUpwards
@@ -62,7 +62,7 @@ public final class NodeCycleGroup implements NodeGroup {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-		NodeCycleGroup nodeCycleGroup = (NodeCycleGroup) o;
+		CycleNodeGroup nodeCycleGroup = (CycleNodeGroup) o;
 		return identity == nodeCycleGroup.identity;
 	}
 

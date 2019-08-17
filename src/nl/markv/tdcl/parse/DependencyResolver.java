@@ -34,7 +34,7 @@ public final class DependencyResolver {
 
 		//TODO @mark: another note: if I add depth instead of prev/next to Chain, then is the in-group order just determined by ordering depth?
 
-		Set<NodeCycleGroup> groups = CycleFinder.distributeIntoCycles(finalNodes);
+		Set<NodeGroup> groups = CycleFinder.distributeIntoCycles(finalNodes);
 
 //		Map<Node, Set<Node>> recursiveDeps = new HashMap<>();
 //		for (Node node : finalNodes) {

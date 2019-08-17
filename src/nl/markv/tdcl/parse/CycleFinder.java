@@ -1,5 +1,6 @@
 package nl.markv.tdcl.parse;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,26 +31,29 @@ public final class CycleFinder {
 		@Nonnull
 		final Map<Node, Set<Node>> recursiveDeps = new HashMap<>();
 		@Nonnull
-		final Map<Node, NodeCycleGroup> nodeGroups = new HashMap<>();
+		final Map<Node, CycleNodeGroup> cycleNodeGroups = new HashMap<>();
 	}
 
 	@Nonnull
-	public static Set<NodeCycleGroup> distributeIntoCycles(@Nonnull List<Node> outputNodes) {
+	public static Set<NodeGroup> distributeIntoCycles(@Nonnull List<Node> outputNodes) {
 		// There is a Set for quickly checking whether there is a cycle,
 		// and a Cycle tree/graph for finding the shortest cycle including
 		// dependencies in case the Set says there is one.
+
+		HashSet<NodeGroup> nodeGroups;
 
 		// Find all cycles of nodes that refer to themselves.
 		CycleSearchState state = new CycleSearchState();
 		for (Node node : outputNodes) {
 			findDependencyCycles(node, new Chain(null, cur(node)), state);
 		}
+		nodeGroups = new HashSet<>(state.cycleNodeGroups.values());
 
 		// Create single-member groups for any nodes not in a cycle.
+		List<SingleNodeGroup> singleGroups = createSingleNodeGroupsForLeftoverNodes(state);
+		nodeGroups.addAll(singleGroups);
 
-
-		//TODO @mark: ordering? later? make unique as well!
-		return new HashSet<>(state.nodeGroups.values());
+		return nodeGroups;
 	}
 
 	@Nonnull
@@ -86,7 +90,7 @@ public final class CycleFinder {
 	}
 
 	@Nonnull
-	private static NodeCycleGroup makeOrJoinGroup(
+	private static CycleNodeGroup makeOrJoinGroup(
 			@Nonnull Node currentNode,
 			@Nonnull Chain chain,
 			@Nonnull CycleSearchState state
@@ -109,23 +113,46 @@ public final class CycleFinder {
 		List<Node> nodes = cycle.stream()
 				.map(dep -> dep.node)
 				.collect(Collectors.toList());
-		NodeCycleGroup newGroup = new NodeCycleGroup(
+		CycleNodeGroup newGroup = new CycleNodeGroup(
 				nodes, canDownwards, canUpwards);
 
 		// Find any existing groups to merge.
-		List<NodeCycleGroup> mergeGroups = nodes.stream()
-				.map(node -> state.nodeGroups.get(node))
+		List<CycleNodeGroup> mergeGroups = nodes.stream()
+				.map(node -> state.cycleNodeGroups.get(node))
 				.filter(grp -> grp != null)
 				.collect(Collectors.toList());
-		for (NodeCycleGroup mergeGroup : mergeGroups) {
+		for (CycleNodeGroup mergeGroup : mergeGroups) {
 			newGroup = newGroup.merge(mergeGroup);
 		}
 
 		// Register as group of the nodes.
 		for (Node node : newGroup.nodes) {
-			state.nodeGroups.put(node, newGroup);
+			state.cycleNodeGroups.put(node, newGroup);
 		}
 
 		return newGroup;
+	}
+
+	@Nonnull
+	private static List<SingleNodeGroup> createSingleNodeGroupsForLeftoverNodes(
+			@Nonnull CycleSearchState state
+	) {
+
+		List<SingleNodeGroup> singleNodeGroups = new ArrayList<>();
+
+		for (Node node : state.recursiveDeps.keySet()) {
+
+			// Only continue if the node is not in any group.
+			NodeGroup existingGroup = state.cycleNodeGroups.get(node);
+			if (existingGroup != null) {
+				continue;
+			}
+
+			// Add the node to a single-node group.
+			SingleNodeGroup newGroup = new SingleNodeGroup(node);
+			singleNodeGroups.add(newGroup);
+		}
+
+		return singleNodeGroups;
 	}
 }
