@@ -1,5 +1,7 @@
 package nl.markv.tdcl.visualize;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -38,10 +40,11 @@ class GraphVizGeneratorTest {
 		kappa.addDependency(next(lambda));
 		beta.addDependency(next(kappa));
 
-		Set<Node> nodes = setOf(alpha, beta, gamma, delta, epsilon, zeta, eta, theta);
-		Set<NodeGroup> groups = CycleFinder.distributeIntoCycles(singletonList(zeta));
+		Set<Node> nodes = setOf(alpha, beta, gamma, delta, epsilon, zeta, eta, theta, kappa, lambda);
+		List<Node> finals = singletonList(zeta);
+		Set<NodeGroup> groups = CycleFinder.distributeIntoCycles(finals);
 
-		String graph = GraphVizGenerator.generateGraphViz(nodes, groups);
+		String graph = GraphVizGenerator.generateGraphViz(nodes, groups, new HashSet<>(finals));
 
 		System.out.println(graph);
 		assertTrue(graph.contains("digraph"));

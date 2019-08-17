@@ -21,7 +21,11 @@ public final class GraphVizCodeBuilder {
 
 	@Nonnull
 	String build() {
-		return "digraph G {\n" + text.toString() + "}\n";
+		return "digraph G {\n" +
+				"\tsize=\"8.3,11.7!\";\n" +
+				"\tmargin=0.5;\n"
+				+ text.toString() +
+				"}\n";
 	}
 
 	void startGroup(
@@ -57,29 +61,28 @@ public final class GraphVizCodeBuilder {
 				.append(" */\n");
 	}
 
-	void node(@Nonnull String name, @Nullable String annotation) {
-		node(name, annotation, null);
+	void node(@Nonnull String name, boolean special, @Nullable String annotation) {
+		node(name, special, annotation, null);
 	}
 
-	void node(@Nonnull String name, @Nullable String annotation, @Nullable String color) {
+	void node(@Nonnull String name, boolean special, @Nullable String annotation, @Nullable String color) {
 		writeIndent();
 		text.append(name);
-		if (annotation != null || color != null) {
-			text.append(" [");
+		if (color == null) {
+			color = "black";
 		}
+		String shape = "ellipse";
+		if (special) {
+			shape = "doubleoctagon";
+		}
+		text.append(" [");
 		if (annotation != null) {
-			text.append("label=\"").append(name).append(" ").append(annotation).append("\"");
+			text.append("label=\"").append(name).append(" ").append(annotation).append("\", ");
 		}
-		if (annotation != null && color != null) {
-			text.append(", ");
-		}
-		if (color != null) {
-			text.append("color=").append(color);
-		}
-		if (annotation != null || color != null) {
-			text.append("]");
-		}
-		text.append(";\n");
+		text.append("color=").append(color);
+		text.append(", fontcolor=").append(color);
+		text.append(", shape=").append(shape);
+		text.append("];\n");
 	}
 
 	void arrow(@Nonnull String from, @Nonnull String to, @Nonnull String color) {

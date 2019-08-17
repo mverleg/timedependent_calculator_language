@@ -20,7 +20,8 @@ public class GraphVizGenerator {
 	@Nonnull
 	public static String generateGraphViz(
 			@Nonnull Set<Node> allNodes,
-			@Nonnull Set<NodeGroup> groups
+			@Nonnull Set<NodeGroup> groups,
+			@Nonnull Set<Node> finalNodes
 	) {
 		var graphViz = new GraphVizCodeBuilder();
 
@@ -50,7 +51,7 @@ public class GraphVizGenerator {
 				graphViz.startGroup("!!!", true);
 			}
 			for (Node node : group.nodes()) {
-				graphViz.node(node.name, null);
+				graphViz.node(node.name, finalNodes.contains(node), null);
 			}
 			graphViz.endGroup();
 		}
@@ -62,11 +63,11 @@ public class GraphVizGenerator {
 			}
 			Node node = group.nodes().iterator().next();
 			if (group.order().equals(NodeGroup.Order.Up)) {
-				graphViz.node(node.name, UP);
+				graphViz.node(node.name, finalNodes.contains(node), UP);
 			} else if (group.order().equals(NodeGroup.Order.Down)) {
-				graphViz.node(node.name, DOWN);
+				graphViz.node(node.name, finalNodes.contains(node), DOWN);
 			} else if (group.order().equals(NodeGroup.Order.Conflict) || group.hasConflict()) {
-				graphViz.node(node.name, "!!!", "red");
+				graphViz.node(node.name, finalNodes.contains(node), "!!!", "red");
 			}
 		}
 
@@ -77,7 +78,7 @@ public class GraphVizGenerator {
 			}
 			Node node = group.nodes().iterator().next();
 			if (group.order().equals(NodeGroup.Order.Any)) {
-				graphViz.node(node.name, null);
+				graphViz.node(node.name, finalNodes.contains(node), null);
 			}
 		}
 
@@ -86,7 +87,7 @@ public class GraphVizGenerator {
 			if (nodeGroups.containsKey(extraNode)) {
 				continue;
 			}
-			graphViz.node(extraNode.name, null, "gray");
+			graphViz.node(extraNode.name, finalNodes.contains(extraNode), null, "gray");
 		}
 
 		graphViz.comment("References to previous rows.");
@@ -114,11 +115,12 @@ public class GraphVizGenerator {
 			for (Dependency fromDependency : toNode.directDependencies) {
 				if (fromDependency.direction == Dependency.Direction.Next) {
 					Node fromNode = fromDependency.node;
-					graphViz.arrow(fromNode.name, toNode.name, "red");
+					graphViz.arrow(fromNode.name, toNode.name, "orange");
 				}
 			}
 		}
 
+		//TODO @mark: legend?
 //		graphViz.comment("Redundant nodes that are not needed for the final result.");
 
 		//TODO @mark: TEMPORARY! REMOVE THIS!
