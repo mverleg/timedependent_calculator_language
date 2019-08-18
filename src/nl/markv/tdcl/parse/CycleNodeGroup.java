@@ -92,6 +92,7 @@ public final class CycleNodeGroup implements NodeGroup {
 			return Order.Conflict;
 		}
 		if (canUpwards && canDownwards) {
+			//TODO @mark: how can a cycle not have an order preference? how is it a cycle then?
 			return Order.Any;
 		}
 		if (canUpwards) {

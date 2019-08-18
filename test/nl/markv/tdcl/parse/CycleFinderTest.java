@@ -137,14 +137,62 @@ class CycleFinderTest {
 
 	@Test
 	void testCurrentOnlyCycleShouldConflict() {
-		throw new UnsupportedOperationException();  //TODO @mark:
-		//TODO @mark: in testMultipleFinals when iota depended on current beta, no error was raised
+		var alpha = new Node("Alpha");
+		var beta = new Node("Beta", cur(alpha));
+		alpha.addDependency(cur(beta));
+		List<Node> finals = listOf(alpha);
+
+		Set<NodeGroup> cycles = CycleFinder.distributeIntoCycles(finals);
+		assertEquals(1, cycles.size());
+		assertTrue(cycles.contains(new CycleNodeGroup(setOf(alpha, beta), true, true)));
+		NodeGroup cycle = cycles.iterator().next();
+		assertTrue(cycle.hasConflict());
 	}
 
 	@Test
 	void testFinalsCanBeSingleGroups() {
-		throw new UnsupportedOperationException();  //TODO @mark:
-		//TODO @mark: finals are always cycle groups, never single nodes (in testMultipleFinals)
+		var alpha = new Node("Alpha");
+		var beta = new Node("Beta", cur(alpha));
+		var gamma = new Node("Gamma", cur(beta));
+		alpha.addDependency(prev(beta));
+		List<Node> finals = listOf(gamma);
+
+		Set<NodeGroup> cycles = CycleFinder.distributeIntoCycles(finals);
+		assertEquals(2, cycles.size());
+		assertTrue(cycles.contains(new CycleNodeGroup(setOf(alpha, beta), true, false)));
+		assertTrue(cycles.contains(new SingleNodeGroup(gamma)));
+	}
+
+	@Test
+	void testMergeOfConflictCycle() {
+		var alpha = new Node("Alpha");
+		var beta = new Node("Beta", cur(alpha));
+		var gamma = new Node("Gamma", cur(beta));
+		var delta = new Node("Delta", cur(beta));
+		alpha.addDependency(prev(beta));
+		delta.addDependency(cur(gamma));
+		List<Node> finals = listOf(delta);
+
+		Set<NodeGroup> cycles = CycleFinder.distributeIntoCycles(finals);
+		assertEquals(1, cycles.size());
+		assertTrue(cycles.contains(new CycleNodeGroup(setOf(alpha, beta, gamma, delta), false, false)));
+	}
+
+	@Test
+	void testFinalIsSingleGroupWhenInbetweenStep() {
+		var alpha = new Node("Alpha");
+		var beta = new Node("Beta", cur(alpha));
+		var gamma = new Node("Gamma", cur(beta));
+		var delta = new Node("Delta");
+		alpha.addDependency(prev(beta));
+		delta.addDependency(cur(gamma));
+		List<Node> finals = listOf(delta);
+
+		Set<NodeGroup> cycles = CycleFinder.distributeIntoCycles(finals);
+		assertEquals(3, cycles.size());
+		assertTrue(cycles.contains(new CycleNodeGroup(setOf(alpha, beta), true, false)));
+		assertTrue(cycles.contains(new SingleNodeGroup(gamma)));
+		assertTrue(cycles.contains(new SingleNodeGroup(delta)));
 	}
 
 	@Test
