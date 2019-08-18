@@ -40,7 +40,7 @@ class GraphVizGeneratorTest {
 		kappa.addDependency(next(lambda));
 		beta.addDependency(next(kappa));
 
-		Set<Node> nodes = setOf(alpha, beta, gamma, delta, epsilon, zeta, eta, theta, kappa, lambda);
+		Set<Node> nodes = setOf(alpha, beta, gamma, delta, epsilon, zeta, eta, theta, iota, kappa, lambda);
 		List<Node> finals = singletonList(zeta);
 		Set<NodeGroup> groups = CycleFinder.distributeIntoCycles(finals);
 

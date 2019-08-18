@@ -7,6 +7,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 public final class EvalOrder implements Iterable<NodeGroup> {
+	//TODO @mark: is this class still needed?
 
 	@Nonnull
 	private final List<NodeGroup> reverseEvalList;

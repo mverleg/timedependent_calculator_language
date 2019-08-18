@@ -32,9 +32,11 @@ public final class Node {
 
 	@Nonnull
 	public Node selfRef(Dependency.Direction direction) {
-		List<Dependency> newDependencies = new ArrayList<>(directDependencies);
-		newDependencies.add(new Dependency(direction, this));
-		return new Node(name, newDependencies.toArray(new Dependency[0]));
+		if (direction == Dependency.Direction.Current) {
+			throw new IllegalStateException();
+		}
+		addDependency(new Dependency(direction, this));
+		return this;
 	}
 
 	public boolean nodeEquals(@Nonnull Node other) {
