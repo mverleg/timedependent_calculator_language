@@ -52,4 +52,9 @@ public final class SingleNodeGroup implements NodeGroup {
 	public boolean hasConflict() {
 		return false;
 	}
+
+	@Override
+	public String toString() {
+		return "SingleNodeGroup: " + node;
+	}
 }

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
@@ -100,5 +101,11 @@ public final class CycleNodeGroup implements NodeGroup {
 			return Order.Down;
 		}
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String toString() {
+		String nodeNames = cycleNodes.stream().map(it -> it.toString()).collect(Collectors.joining(", "));
+		return order().name() + " CycleNodeGroup: " + nodeNames;
 	}
 }

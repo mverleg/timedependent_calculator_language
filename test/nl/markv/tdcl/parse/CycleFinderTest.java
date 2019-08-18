@@ -11,6 +11,7 @@ import nl.markv.tdcl.visualize.GraphVizGenerator;
 
 import static java.util.Collections.singletonList;
 import static nl.markv.tdcl.data.Dependency.Direction.Current;
+import static nl.markv.tdcl.data.Dependency.Direction.Next;
 import static nl.markv.tdcl.data.Dependency.Direction.Previous;
 import static nl.markv.tdcl.data.Dependency.cur;
 import static nl.markv.tdcl.data.Dependency.prev;
@@ -111,11 +112,40 @@ class CycleFinderTest {
 		assertTrue(cycles.contains(new CycleNodeGroup(setOf(delta, beta, gamma, epsilon), true, false)));
 	}
 
-	//TODO @mark: test over-aggressive merging of groups
+	@Test
+	void testDoNotMergeUnrelatedCycles() {
+		var alpha = new Node("Alpha");
+		var beta = new Node("Beta", cur(alpha));
+		var gamma = new Node("Gamma", cur(beta));
+		var delta = new Node("Delta");
+		var epsilon = new Node("Epsilon", cur(delta));
+		var zeta = new Node("Zeta").selfRef(Previous);
+		var eta = new Node("Eta", cur(zeta)).selfRef(Next);
+		alpha.addDependency(prev(gamma));
+		delta.addDependency(prev(epsilon));
+		beta.addDependency(cur(delta));
+		gamma.addDependency(cur(eta));
+		List<Node> finals = listOf(alpha);
 
-	//TODO @mark: in testMultipleFinals when iota depended on current beta, no error was raised
+		Set<NodeGroup> cycles = CycleFinder.distributeIntoCycles(finals);
+		assertEquals(4, cycles.size());
+		assertTrue(cycles.contains(new CycleNodeGroup(setOf(alpha, beta, gamma), true, false)));
+		assertTrue(cycles.contains(new CycleNodeGroup(setOf(delta, epsilon), true, false)));
+		assertTrue(cycles.contains(new CycleNodeGroup(setOf(zeta), true, false)));
+		assertTrue(cycles.contains(new CycleNodeGroup(setOf(eta), false, true)));
+	}
 
-	//TODO @mark: finals are always cycle groups, never single nodes
+	@Test
+	void testCurrentOnlyCycleShouldConflict() {
+		throw new UnsupportedOperationException();  //TODO @mark:
+		//TODO @mark: in testMultipleFinals when iota depended on current beta, no error was raised
+	}
+
+	@Test
+	void testFinalsCanBeSingleGroups() {
+		throw new UnsupportedOperationException();  //TODO @mark:
+		//TODO @mark: finals are always cycle groups, never single nodes (in testMultipleFinals)
+	}
 
 	@Test
 	void testMultipleFinals() {
