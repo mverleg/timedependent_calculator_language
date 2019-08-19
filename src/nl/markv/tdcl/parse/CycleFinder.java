@@ -45,6 +45,9 @@ public final class CycleFinder {
 		// Find all cycles of nodes that refer to themselves.
 		CycleSearchState state = new CycleSearchState();
 		for (Node node : outputNodes) {
+			if (state.recursiveDeps.containsKey(node)) {
+				continue;
+			}
 			findDependencyCycles(node, new Chain(null, cur(node)), state);
 		}
 		nodeGroups = new HashSet<>(state.cycleNodeGroups.values());
@@ -117,10 +120,10 @@ public final class CycleFinder {
 				nodes, canDownwards, canUpwards);
 
 		// Find any existing groups to merge.
-		List<CycleNodeGroup> mergeGroups = nodes.stream()
+		Set<CycleNodeGroup> mergeGroups = nodes.stream()
 				.map(node -> state.cycleNodeGroups.get(node))
 				.filter(grp -> grp != null)
-				.collect(Collectors.toList());
+				.collect(Collectors.toSet());
 		for (CycleNodeGroup mergeGroup : mergeGroups) {
 			newGroup = newGroup.merge(mergeGroup);
 		}

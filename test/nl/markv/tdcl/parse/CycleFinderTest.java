@@ -10,7 +10,6 @@ import nl.markv.tdcl.data.Node;
 import nl.markv.tdcl.visualize.GraphVizGenerator;
 
 import static java.util.Collections.singletonList;
-import static nl.markv.tdcl.data.Dependency.Direction.Current;
 import static nl.markv.tdcl.data.Dependency.Direction.Next;
 import static nl.markv.tdcl.data.Dependency.Direction.Previous;
 import static nl.markv.tdcl.data.Dependency.cur;
@@ -193,6 +192,33 @@ class CycleFinderTest {
 		assertTrue(cycles.contains(new CycleNodeGroup(setOf(alpha, beta), true, false)));
 		assertTrue(cycles.contains(new SingleNodeGroup(gamma)));
 		assertTrue(cycles.contains(new SingleNodeGroup(delta)));
+	}
+
+	@Test
+	void testLongCycleWithExternalFinals() {
+		var alpha = new Node("Alpha");
+		var beta = new Node("Beta", prev(alpha));
+		var gamma = new Node("Gamma", cur(beta));
+		var delta = new Node("Delta", cur(gamma));
+		var epsilon = new Node("Epsilon", cur(delta));
+		var theta = new Node("Theta", cur(epsilon));
+		var zeta = new Node("Zeta", cur(theta));
+		var eta = new Node("Eta", cur(zeta));
+		var iota = new Node("Iota", cur(delta)).selfRef(Previous);
+		alpha.addDependency(prev(zeta));
+		List<Node> finals = listOf(iota, eta);
+
+		Set<NodeGroup> groups = CycleFinder.distributeIntoCycles(finals);  //TODO @mark: TEMPORARY! REMOVE THIS!
+		String graph = GraphVizGenerator.generateGraphViz(setOf(alpha, beta, gamma, delta, epsilon, theta, zeta, eta, iota), groups, new HashSet<>(finals));  //TODO @mark: TEMPORARY! REMOVE THIS!
+		System.out.println(graph);  //TODO @mark: TEMPORARY! REMOVE THIS!
+
+		//TODO @mark: eta incorrectly gets pulled into the bigger group
+
+		Set<NodeGroup> cycles = CycleFinder.distributeIntoCycles(finals);
+		assertEquals(3, cycles.size());
+		assertTrue(cycles.contains(new SingleNodeGroup(iota)));
+		assertTrue(cycles.contains(new SingleNodeGroup(eta)));
+		assertTrue(cycles.contains(new CycleNodeGroup(setOf(alpha, beta, gamma, delta, epsilon, theta, zeta), true, false)));
 	}
 
 	@Test
