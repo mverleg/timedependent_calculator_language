@@ -10,7 +10,6 @@ import nl.markv.tdcl.data.Node;
 import nl.markv.tdcl.visualize.GraphVizGenerator;
 
 import static java.util.Collections.singletonList;
-import static nl.markv.tdcl.data.Dependency.Direction.Current;
 import static nl.markv.tdcl.data.Dependency.Direction.Next;
 import static nl.markv.tdcl.data.Dependency.Direction.Previous;
 import static nl.markv.tdcl.data.Dependency.cur;
@@ -165,7 +164,23 @@ class CycleFinderTest {
 	}
 
 	@Test
-	void testMergeOfConflictCycle() {
+	void testMergeOfUpAndDownCycle() {
+		var alpha = new Node("Alpha");
+		var beta = new Node("Beta", next(alpha));
+		var gamma = new Node("Gamma", cur(beta));
+		var delta = new Node("Delta", prev(gamma));
+		alpha.addDependency(cur(beta));
+		gamma.addDependency(cur(delta));
+		alpha.addDependency(cur(delta));
+		List<Node> finals = listOf(delta);
+
+		Set<NodeGroup> cycles = CycleFinder.distributeIntoCycles(finals);
+		assertEquals(1, cycles.size());
+		assertTrue(cycles.contains(new CycleNodeGroup(setOf(alpha, beta, gamma, delta), false, false)));
+	}
+
+	@Test
+	void testMergeOfIndividuallyConflictingCycle() {
 		var alpha = new Node("Alpha");
 		var beta = new Node("Beta", next(alpha));
 		var gamma = new Node("Gamma", cur(beta));
@@ -174,10 +189,6 @@ class CycleFinderTest {
 		gamma.addDependency(cur(delta));
 		alpha.addDependency(cur(delta));
 		List<Node> finals = listOf(delta);
-
-		Set<NodeGroup> groups = CycleFinder.distributeIntoCycles(finals);  //TODO @mark: TEMPORARY! REMOVE THIS!
-		String graph = GraphVizGenerator.generateGraphViz(setOf(alpha, beta, gamma, delta), groups, new HashSet<>(finals));  //TODO @mark: TEMPORARY! REMOVE THIS!
-		System.out.println(graph);  //TODO @mark: TEMPORARY! REMOVE THIS!
 
 		Set<NodeGroup> cycles = CycleFinder.distributeIntoCycles(finals);
 		assertEquals(1, cycles.size());
@@ -251,7 +262,7 @@ class CycleFinderTest {
 	void testDirectDoubleDependency() {
 		var alpha = new Node("Alpha");
 		var beta = new Node("Beta", cur(alpha), prev(alpha));
-		List<Node> finals = listOf(alpha);
+		List<Node> finals = listOf(beta);
 
 		Set<NodeGroup> groups = CycleFinder.distributeIntoCycles(finals);  //TODO @mark: TEMPORARY! REMOVE THIS!
 		String graph = GraphVizGenerator.generateGraphViz(setOf(alpha, beta), groups, new HashSet<>(finals));  //TODO @mark: TEMPORARY! REMOVE THIS!
