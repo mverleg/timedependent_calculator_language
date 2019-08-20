@@ -32,21 +32,26 @@ public final class CycleFinder {
 		@Nonnull
 		final Map<Node, Set<Node>> recursiveDeps = new HashMap<>();
 		@Nonnull
-		final Set<Node> everSeenNodes = new HashSet<>();
+		final Set<Node> everSeenNodes;
 		@Nonnull
 		final Map<Node, CycleNodeGroup> cycleNodeGroups;
 
 		private CycleSearchState() {
 			cycleNodeGroups = new HashMap<>();
+			everSeenNodes = new HashSet<>();
 		}
 
-		private CycleSearchState(@Nonnull Map<Node, CycleNodeGroup> cycleNodeGroups) {
+		private CycleSearchState(
+				@Nonnull Set<Node> everSeenNodes,
+				@Nonnull Map<Node, CycleNodeGroup> cycleNodeGroups
+		) {
+			this.everSeenNodes = everSeenNodes;
 			this.cycleNodeGroups = cycleNodeGroups;
 		}
 
 		@Nonnull
 		private CycleSearchState refresh() {
-			return new CycleSearchState(this.cycleNodeGroups);
+			return new CycleSearchState(this.everSeenNodes, this.cycleNodeGroups);
 		}
 	}
 

@@ -276,6 +276,22 @@ class CycleFinderTest {
 	}
 
 	@Test
+	void testSingleOnlyUsedBySecondFinal() {
+		var alpha = new Node("Alpha");
+		var beta = new Node("Beta", cur(alpha));
+		var gamma = new Node("Gamma");
+		var delta = new Node("Delta", cur(gamma));
+		List<Node> finals = listOf(beta, delta);
+
+		Set<NodeGroup> cycles = CycleFinder.distributeIntoCycles(finals);
+		assertEquals(4, cycles.size());
+		assertTrue(cycles.contains(new SingleNodeGroup(alpha)));
+		assertTrue(cycles.contains(new SingleNodeGroup(beta)));
+		assertTrue(cycles.contains(new SingleNodeGroup(gamma)));
+		assertTrue(cycles.contains(new SingleNodeGroup(delta)));
+	}
+
+	@Test
 	void testDiamond() {
 		var alpha = new Node("Alpha");
 		var beta = new Node("Beta", cur(alpha));
