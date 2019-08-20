@@ -14,6 +14,7 @@ import static nl.markv.tdcl.data.Dependency.Direction.Current;
 import static nl.markv.tdcl.data.Dependency.Direction.Next;
 import static nl.markv.tdcl.data.Dependency.Direction.Previous;
 import static nl.markv.tdcl.data.Dependency.cur;
+import static nl.markv.tdcl.data.Dependency.next;
 import static nl.markv.tdcl.data.Dependency.prev;
 import static nl.markv.tdcl.util.CollectionUtil.listOf;
 import static nl.markv.tdcl.util.CollectionUtil.setOf;
@@ -166,12 +167,17 @@ class CycleFinderTest {
 	@Test
 	void testMergeOfConflictCycle() {
 		var alpha = new Node("Alpha");
-		var beta = new Node("Beta", cur(alpha));
+		var beta = new Node("Beta", next(alpha));
 		var gamma = new Node("Gamma", cur(beta));
-		var delta = new Node("Delta", cur(beta));
+		var delta = new Node("Delta", cur(gamma));
 		alpha.addDependency(prev(beta));
-		delta.addDependency(cur(gamma));
+		gamma.addDependency(cur(delta));
+		alpha.addDependency(cur(delta));
 		List<Node> finals = listOf(delta);
+
+		Set<NodeGroup> groups = CycleFinder.distributeIntoCycles(finals);  //TODO @mark: TEMPORARY! REMOVE THIS!
+		String graph = GraphVizGenerator.generateGraphViz(setOf(alpha, beta, gamma, delta), groups, new HashSet<>(finals));  //TODO @mark: TEMPORARY! REMOVE THIS!
+		System.out.println(graph);  //TODO @mark: TEMPORARY! REMOVE THIS!
 
 		Set<NodeGroup> cycles = CycleFinder.distributeIntoCycles(finals);
 		assertEquals(1, cycles.size());
