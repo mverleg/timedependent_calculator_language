@@ -15,6 +15,7 @@ import nl.markv.tdcl.data.Dependency.Direction;
 import nl.markv.tdcl.data.Node;
 
 import static nl.markv.tdcl.data.Dependency.cur;
+import static nl.markv.tdcl.util.CollectionUtil.setOf;
 
 /**
  * Distribute the nodes into groups, with the smallest possible cycle per group.
@@ -31,7 +32,20 @@ public final class CycleFinder {
 		@Nonnull
 		final Map<Node, Set<Node>> recursiveDeps = new HashMap<>();
 		@Nonnull
-		final Map<Node, CycleNodeGroup> cycleNodeGroups = new HashMap<>();
+		final Map<Node, CycleNodeGroup> cycleNodeGroups;
+
+		private CycleSearchState() {
+			cycleNodeGroups = new HashMap<>();
+		}
+
+		private CycleSearchState(@Nonnull Map<Node, CycleNodeGroup> cycleNodeGroups) {
+			this.cycleNodeGroups = cycleNodeGroups;
+		}
+
+		@Nonnull
+		private CycleSearchState refresh() {
+			return new CycleSearchState(this.cycleNodeGroups);
+		}
 	}
 
 	@Nonnull
@@ -40,15 +54,20 @@ public final class CycleFinder {
 		// and a Cycle tree/graph for finding the shortest cycle including
 		// dependencies in case the Set says there is one.
 
-		HashSet<NodeGroup> nodeGroups;
+		Set<NodeGroup> nodeGroups;
+		Set<Node> stopOnNodes = setOf();
 
 		// Find all cycles of nodes that refer to themselves.
 		CycleSearchState state = new CycleSearchState();
 		for (Node node : outputNodes) {
-			if (state.recursiveDeps.containsKey(node)) {
-				continue;
-			}
-			findDependencyCycles(node, new Chain(null, cur(node)), state);
+			// Create a fresh state, including cycles but excluding known nodes.
+			state = state.refresh();
+
+			// Recursively find cycles in dependencies.
+			findDependencyCycles(node, new Chain(null, cur(node)), state, stopOnNodes);
+
+			// Add this start node, so that next finals quit when encountering it.
+			stopOnNodes.add(node);
 		}
 		nodeGroups = new HashSet<>(state.cycleNodeGroups.values());
 
@@ -63,7 +82,8 @@ public final class CycleFinder {
 	private static void findDependencyCycles(
 			@Nonnull Node currentNode,
 			@Nonnull Chain chain,
-			@Nonnull CycleSearchState state
+			@Nonnull CycleSearchState state,
+			@Nonnull Set<Node> stopOnNodes
 	) {
 		// Check whether dependencies are already known.
 		if (state.recursiveDeps.get(currentNode) != null) {
@@ -80,7 +100,8 @@ public final class CycleFinder {
 			findDependencyCycles(
 					dep.node,
 					new Chain(chain, dep),
-					state
+					state,
+					stopOnNodes
 			);
 
 			// Add direct dependency.
@@ -93,6 +114,7 @@ public final class CycleFinder {
 	}
 
 	@Nonnull
+	@SuppressWarnings("UnusedReturnValue")
 	private static CycleNodeGroup makeOrJoinGroup(
 			@Nonnull Node currentNode,
 			@Nonnull Chain chain,

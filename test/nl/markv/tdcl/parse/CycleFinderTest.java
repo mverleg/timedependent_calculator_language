@@ -10,6 +10,7 @@ import nl.markv.tdcl.data.Node;
 import nl.markv.tdcl.visualize.GraphVizGenerator;
 
 import static java.util.Collections.singletonList;
+import static nl.markv.tdcl.data.Dependency.Direction.Current;
 import static nl.markv.tdcl.data.Dependency.Direction.Next;
 import static nl.markv.tdcl.data.Dependency.Direction.Previous;
 import static nl.markv.tdcl.data.Dependency.cur;
@@ -219,6 +220,25 @@ class CycleFinderTest {
 		assertTrue(cycles.contains(new SingleNodeGroup(iota)));
 		assertTrue(cycles.contains(new SingleNodeGroup(eta)));
 		assertTrue(cycles.contains(new CycleNodeGroup(setOf(alpha, beta, gamma, delta, epsilon, theta, zeta), true, false)));
+	}
+
+	@Test
+	void testManyFinals() {
+		var alpha = new Node("Alpha").selfRef(Previous);
+		var beta = new Node("Beta", prev(alpha)).selfRef(Previous);
+		var gamma = new Node("Gamma", cur(beta)).selfRef(Previous);
+		var delta = new Node("Delta", cur(gamma)).selfRef(Previous);
+		var epsilon = new Node("Epsilon", cur(delta));
+		var theta = new Node("Theta", cur(epsilon));
+		var zeta = new Node("Zeta", cur(theta));
+		var eta = new Node("Eta", cur(zeta));
+		var iota = new Node("Iota", cur(eta));
+		alpha.addDependency(prev(iota));
+		List<Node> finals = listOf(alpha, gamma, epsilon, zeta, iota);
+
+		Set<NodeGroup> cycles = CycleFinder.distributeIntoCycles(finals);
+		assertEquals(1, cycles.size());
+		assertTrue(cycles.contains(new CycleNodeGroup(setOf(alpha, beta, gamma, delta, epsilon, theta, zeta, eta, iota), true, false)));
 	}
 
 	@Test
