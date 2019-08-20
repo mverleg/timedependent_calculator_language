@@ -32,6 +32,8 @@ public final class CycleFinder {
 		@Nonnull
 		final Map<Node, Set<Node>> recursiveDeps = new HashMap<>();
 		@Nonnull
+		final Set<Node> everSeenNodes = new HashSet<>();
+		@Nonnull
 		final Map<Node, CycleNodeGroup> cycleNodeGroups;
 
 		private CycleSearchState() {
@@ -93,6 +95,7 @@ public final class CycleFinder {
 		}
 		Set<Node> currentNodeRecDeps = new HashSet<>();
 		state.recursiveDeps.put(currentNode, currentNodeRecDeps);
+		state.everSeenNodes.add(currentNode);
 
 		for (Dependency dep : currentNode.directDependencies) {
 
@@ -165,7 +168,7 @@ public final class CycleFinder {
 
 		List<SingleNodeGroup> singleNodeGroups = new ArrayList<>();
 
-		for (Node node : state.recursiveDeps.keySet()) {
+		for (Node node : state.everSeenNodes) {
 
 			// Only continue if the node is not in any group.
 			NodeGroup existingGroup = state.cycleNodeGroups.get(node);

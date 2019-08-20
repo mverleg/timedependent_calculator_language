@@ -261,14 +261,10 @@ class CycleFinderTest {
 	void testIndirectDoubleDependency() {
 		var alpha = new Node("Alpha");
 		var beta = new Node("Beta", cur(alpha));
-		var gamma = new Node("Gamma", cur(beta));
-		var delta = new Node("Delta", cur(beta));
+		var gamma = new Node("Gamma");
+		var delta = new Node("Delta", cur(beta), cur(gamma));
 		var epsilon = new Node("Epsilon", cur(delta));
-		List<Node> finals = listOf(beta, epsilon);
-
-		Set<NodeGroup> groups = CycleFinder.distributeIntoCycles(finals);  //TODO @mark: TEMPORARY! REMOVE THIS!
-		String graph = GraphVizGenerator.generateGraphViz(setOf(alpha, beta, gamma, delta, epsilon), groups, new HashSet<>(finals));  //TODO @mark: TEMPORARY! REMOVE THIS!
-		System.out.println(graph);  //TODO @mark: TEMPORARY! REMOVE THIS!
+		List<Node> finals = listOf(epsilon);
 
 		Set<NodeGroup> cycles = CycleFinder.distributeIntoCycles(finals);
 		assertEquals(5, cycles.size());
