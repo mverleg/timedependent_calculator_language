@@ -47,9 +47,7 @@ public class Chain {
 	}
 
 	@Nonnull
-	public List<Dependency> findUptoNode(@Nonnull Node uptoNode) {
-
-		//TODO @mark: I have a feeling this method could be easier...
+	public Optional<List<Dependency>> findUptoNode(@Nonnull Node uptoNode) {
 
 		List<Dependency> uptoList = new ArrayList<>();
 		Chain current = this;
@@ -57,7 +55,7 @@ public class Chain {
 			uptoList.add(current.dependency);
 			current = current.parent;
 			if (current == null) {
-				break;
+				return Optional.empty();
 			}
 			if (current.dependency.node.equals(uptoNode)) {
 				if (!current.dependency.node.equals(dependency.node)) {
@@ -67,7 +65,7 @@ public class Chain {
 			}
 		}
 
-		return uptoList;
+		return Optional.of(uptoList);
 	}
 
 	@Nonnull

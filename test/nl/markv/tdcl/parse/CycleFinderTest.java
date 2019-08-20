@@ -293,6 +293,9 @@ class CycleFinderTest {
 
 	@Test
 	void testDiamond() {
+
+		//TODO @mark: I think this might mean I have to search in chains only, not in seen nodes... Or in seen node first and then tail? Or fail in upTo if not found
+
 		var alpha = new Node("Alpha");
 		var beta = new Node("Beta", cur(alpha));
 		var gamma = new Node("Gamma", cur(alpha));

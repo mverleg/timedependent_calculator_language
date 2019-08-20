@@ -1,6 +1,7 @@
 package nl.markv.tdcl.parse;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -38,10 +39,11 @@ class ChainTest {
 		var gamma = new Node("Gamma", cur(beta));
 		new Node("Delta", cur(beta));
 		Chain chain = new Chain(new Chain(new Chain(null, cur(alpha)), prev(beta)), next(gamma));
-		List<Dependency> linear = chain.findUptoNode(beta);
-		assertEquals(2, linear.size());
-		assertEquals(gamma, linear.get(0).node);
-		assertEquals(beta, linear.get(1).node);
+		Optional<List<Dependency>> linear = chain.findUptoNode(beta);
+		assertTrue(linear.isPresent());
+		assertEquals(2, linear.get().size());
+		assertEquals(gamma, linear.get().get(0).node);
+		assertEquals(beta, linear.get().get(1).node);
 	}
 
 	@Test
@@ -51,9 +53,21 @@ class ChainTest {
 		var gamma = new Node("Gamma", cur(beta));
 		alpha.addDependency(cur(gamma));
 		Chain chain = new Chain(new Chain(new Chain(new Chain(null, cur(gamma)), cur(alpha)), prev(beta)), next(gamma));
-		List<Dependency> linear = chain.findUptoNode(beta);
-		assertEquals(2, linear.size());
-		assertEquals(gamma, linear.get(0).node);
-		assertEquals(beta, linear.get(1).node);
+		Optional<List<Dependency>> cycle = chain.findUptoNode(beta);
+		assertTrue(cycle.isPresent());
+		assertEquals(2, cycle.get().size());
+		assertEquals(gamma, cycle.get().get(0).node);
+		assertEquals(beta, cycle.get().get(1).node);
+	}
+
+	@Test
+	void findUptoNodeMissing() {
+		var alpha = new Node("Alpha");
+		var beta = new Node("Beta", cur(alpha));
+		var gamma = new Node("Gamma", cur(beta));
+		var delta = new Node("Delta", cur(gamma));
+		Chain chain = new Chain(new Chain(new Chain(null, cur(alpha)), cur(beta)), prev(gamma));
+		Optional<List<Dependency>> missing = chain.findUptoNode(delta);
+		assertTrue(missing.isEmpty());
 	}
 }

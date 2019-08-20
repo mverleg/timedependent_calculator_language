@@ -5,10 +5,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import nl.markv.tdcl.data.Dependency;
 import nl.markv.tdcl.data.Dependency.Direction;
@@ -121,7 +123,7 @@ public final class CycleFinder {
 		}
 	}
 
-	@Nonnull
+	@Nullable
 	@SuppressWarnings("UnusedReturnValue")
 	private static CycleNodeGroup makeOrJoinGroup(
 			@Nonnull Node currentNode,
@@ -129,7 +131,11 @@ public final class CycleFinder {
 			@Nonnull CycleSearchState state
 	) {
 		// Find the cycle nodes.
-		List<Dependency> cycle = chain.findUptoNode(currentNode);
+		Optional<List<Dependency>> cycleOption = chain.findUptoNode(currentNode);
+		if (cycleOption.isEmpty()) {
+			return null;
+		}
+		List<Dependency> cycle = cycleOption.get();
 
 		// Determine the direction(s).
 		boolean canDownwards = true;
