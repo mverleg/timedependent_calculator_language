@@ -217,7 +217,7 @@ class CycleFinderTest {
 
 		Set<NodeGroup> cycles = CycleFinder.distributeIntoCycles(finals);
 		assertEquals(3, cycles.size());
-		assertTrue(cycles.contains(new SingleNodeGroup(iota)));
+		assertTrue(cycles.contains(new CycleNodeGroup(setOf(iota), true, false)));
 		assertTrue(cycles.contains(new SingleNodeGroup(eta)));
 		assertTrue(cycles.contains(new CycleNodeGroup(setOf(alpha, beta, gamma, delta, epsilon, theta, zeta), true, false)));
 	}
@@ -242,6 +242,64 @@ class CycleFinderTest {
 	}
 
 	@Test
+	void testDirectDoubleDependency() {
+		var alpha = new Node("Alpha");
+		var beta = new Node("Beta", cur(alpha), prev(alpha));
+		List<Node> finals = listOf(alpha);
+
+		Set<NodeGroup> groups = CycleFinder.distributeIntoCycles(finals);  //TODO @mark: TEMPORARY! REMOVE THIS!
+		String graph = GraphVizGenerator.generateGraphViz(setOf(alpha, beta), groups, new HashSet<>(finals));  //TODO @mark: TEMPORARY! REMOVE THIS!
+		System.out.println(graph);  //TODO @mark: TEMPORARY! REMOVE THIS!
+
+		Set<NodeGroup> cycles = CycleFinder.distributeIntoCycles(finals);
+		assertEquals(2, cycles.size());
+		assertTrue(cycles.contains(new SingleNodeGroup(alpha)));
+		assertTrue(cycles.contains(new SingleNodeGroup(beta)));
+	}
+
+	@Test
+	void testIndirectDoubleDependency() {
+		var alpha = new Node("Alpha");
+		var beta = new Node("Beta", cur(alpha));
+		var gamma = new Node("Gamma", cur(beta));
+		var delta = new Node("Delta", cur(beta));
+		var epsilon = new Node("Epsilon", cur(delta));
+		List<Node> finals = listOf(beta, epsilon);
+
+		Set<NodeGroup> groups = CycleFinder.distributeIntoCycles(finals);  //TODO @mark: TEMPORARY! REMOVE THIS!
+		String graph = GraphVizGenerator.generateGraphViz(setOf(alpha, beta, gamma, delta, epsilon), groups, new HashSet<>(finals));  //TODO @mark: TEMPORARY! REMOVE THIS!
+		System.out.println(graph);  //TODO @mark: TEMPORARY! REMOVE THIS!
+
+		Set<NodeGroup> cycles = CycleFinder.distributeIntoCycles(finals);
+		assertEquals(5, cycles.size());
+		assertTrue(cycles.contains(new SingleNodeGroup(alpha)));
+		assertTrue(cycles.contains(new SingleNodeGroup(beta)));
+		assertTrue(cycles.contains(new SingleNodeGroup(gamma)));
+		assertTrue(cycles.contains(new SingleNodeGroup(delta)));
+		assertTrue(cycles.contains(new SingleNodeGroup(epsilon)));
+	}
+
+	@Test
+	void testDiamond() {
+		var alpha = new Node("Alpha");
+		var beta = new Node("Beta", cur(alpha));
+		var gamma = new Node("Gamma", cur(alpha));
+		var delta = new Node("Delta", cur(beta), cur(gamma));
+		List<Node> finals = listOf(delta);
+
+		Set<NodeGroup> groups = CycleFinder.distributeIntoCycles(finals);  //TODO @mark: TEMPORARY! REMOVE THIS!
+		String graph = GraphVizGenerator.generateGraphViz(setOf(alpha, beta, gamma, delta), groups, new HashSet<>(finals));  //TODO @mark: TEMPORARY! REMOVE THIS!
+		System.out.println(graph);  //TODO @mark: TEMPORARY! REMOVE THIS!
+
+		Set<NodeGroup> cycles = CycleFinder.distributeIntoCycles(finals);
+		assertEquals(4, cycles.size());
+		assertTrue(cycles.contains(new SingleNodeGroup(alpha)));
+		assertTrue(cycles.contains(new SingleNodeGroup(beta)));
+		assertTrue(cycles.contains(new SingleNodeGroup(gamma)));
+		assertTrue(cycles.contains(new SingleNodeGroup(delta)));
+	}
+
+	@Test
 	void testMultipleFinals() {
 		var alpha = new Node("Alpha");
 		var beta = new Node("Beta", cur(alpha));
@@ -263,6 +321,7 @@ class CycleFinderTest {
 		System.out.println(graph);  //TODO @mark: TEMPORARY! REMOVE THIS!
 
 		//TODO @mark: eta incorrectly gets pulled into the bigger group
+		//TODO @mark: epsilon gets unjustly discarded
 
 		Set<NodeGroup> cycles = CycleFinder.distributeIntoCycles(finals);
 		assertEquals(5, cycles.size());
